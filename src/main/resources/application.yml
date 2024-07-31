@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: caju
+  datasource:
+    url: jdbc:postgresql://localhost:9999/caju
+    username: caju
+    password: caju
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false

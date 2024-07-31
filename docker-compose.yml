@@ -1,0 +1,12 @@
+services:
+  db:
+    container_name: caju-db
+    image: postgres:16-alpine
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_DB: caju
+      POSTGRES_USER: caju
+      POSTGRES_PASSWORD: caju
+    ports:
+      - "9999:5432"
