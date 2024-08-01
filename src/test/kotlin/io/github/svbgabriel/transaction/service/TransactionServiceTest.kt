@@ -46,7 +46,7 @@ class TransactionServiceTest {
                 id = id,
                 foodBalance = 15.0,
                 mealBalance = 15.0,
-                cashBalance = 20.0,
+                cashBalance = 5.0,
             )
 
         val request =
@@ -104,7 +104,7 @@ class TransactionServiceTest {
                 id = id,
                 foodBalance = 15.0,
                 mealBalance = 15.0,
-                cashBalance = 20.0,
+                cashBalance = 5.0,
             )
 
         val request =
@@ -196,6 +196,41 @@ class TransactionServiceTest {
                 mcc = "9999",
                 amount = 10.0,
                 merchant = "STORE  SAO PAULO BR",
+            )
+
+        val updatedUser =
+            UserEntity(
+                id = id,
+                foodBalance = 15.0,
+                mealBalance = 15.0,
+                cashBalance = 0.0,
+            )
+        every { userRepository.save(any()) } returns updatedUser
+
+        val result = transactionService.validateTransaction(request)
+
+        assertEquals("00", result.code)
+    }
+
+    @Test
+    fun `should return code 00 when the meal balance is not enough but the cash balance is`() {
+        val id = 1L
+        val user =
+            UserEntity(
+                id = id,
+                foodBalance = 15.0,
+                mealBalance = 15.0,
+                cashBalance = 30.0,
+            )
+
+        every { userRepository.findByIdOrNull(id) } returns user
+
+        val request =
+            ValidateTransactionRequest(
+                accountId = id,
+                mcc = "5811",
+                amount = 25.0,
+                merchant = "RESTAURANT  SAO PAULO BR",
             )
 
         val updatedUser =
