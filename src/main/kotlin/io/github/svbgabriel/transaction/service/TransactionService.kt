@@ -15,7 +15,7 @@ class TransactionService(
         val user =
             userRepository.findByIdOrNull(request.accountId)
                 ?: return ValidateTransactionResponse(code = "07")
-        val mcc = MCC.getMCCValue(request.mcc)
+        val mcc = getMCCByMerchantName(request.merchant) ?: MCC.getMCCValue(request.mcc)
         return if (mcc == MCC.FOOD && user.foodBalance >= request.amount) {
             user.foodBalance -= request.amount
             userRepository.save(user)
@@ -30,6 +30,23 @@ class TransactionService(
             ValidateTransactionResponse(code = "00")
         } else {
             ValidateTransactionResponse(code = "51")
+        }
+    }
+
+    private fun getMCCByMerchantName(merchant: String): MCC? {
+        val namePart =
+            merchant
+                .replace("\\s+".toRegex(), " ")
+                .split(" ")
+                .dropLast(2)
+                .joinToString(" ")
+
+        return if (namePart.contains("food", ignoreCase = true) || namePart.contains("market", ignoreCase = true)) {
+            MCC.FOOD
+        } else if (namePart.contains("meal", ignoreCase = true) || namePart.contains("eat", ignoreCase = true)) {
+            MCC.MEAL
+        } else {
+            null
         }
     }
 }

@@ -89,7 +89,7 @@ class TransactionServiceTest {
                 mealBalance = 15.0,
                 cashBalance = 20.0,
             )
-        every { userRepository.save(any()) } returns updatedUser
+        every { userRepository.save(updatedUser) } returns updatedUser
 
         val result = transactionService.validateTransaction(request)
 
@@ -147,7 +147,7 @@ class TransactionServiceTest {
                 mealBalance = 5.0,
                 cashBalance = 20.0,
             )
-        every { userRepository.save(any()) } returns updatedUser
+        every { userRepository.save(updatedUser) } returns updatedUser
 
         val result = transactionService.validateTransaction(request)
 
@@ -203,9 +203,9 @@ class TransactionServiceTest {
                 id = id,
                 foodBalance = 15.0,
                 mealBalance = 15.0,
-                cashBalance = 0.0,
+                cashBalance = 20.0,
             )
-        every { userRepository.save(any()) } returns updatedUser
+        every { userRepository.save(updatedUser) } returns updatedUser
 
         val result = transactionService.validateTransaction(request)
 
@@ -238,9 +238,44 @@ class TransactionServiceTest {
                 id = id,
                 foodBalance = 15.0,
                 mealBalance = 15.0,
+                cashBalance = 5.0,
+            )
+        every { userRepository.save(updatedUser) } returns updatedUser
+
+        val result = transactionService.validateTransaction(request)
+
+        assertEquals("00", result.code)
+    }
+
+    @Test
+    fun `should use food mcc because merchant name has precedence`() {
+        val id = 1L
+        val user =
+            UserEntity(
+                id = id,
+                foodBalance = 15.0,
+                mealBalance = 0.0,
                 cashBalance = 0.0,
             )
-        every { userRepository.save(any()) } returns updatedUser
+
+        every { userRepository.findByIdOrNull(id) } returns user
+
+        val request =
+            ValidateTransactionRequest(
+                accountId = id,
+                mcc = "5812",
+                amount = 15.0,
+                merchant = "MARKET  SAO PAULO BR",
+            )
+
+        val updatedUser =
+            UserEntity(
+                id = id,
+                foodBalance = 0.0,
+                mealBalance = 0.0,
+                cashBalance = 0.0,
+            )
+        every { userRepository.save(updatedUser) } returns updatedUser
 
         val result = transactionService.validateTransaction(request)
 
